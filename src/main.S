@@ -10,13 +10,16 @@ main:
 	b	.-4
 
 primary_cpu_continue:
-	adr	x0, hello_world
+	adr	x0, current_el
 	bl	writeln
 
-	ldr	x0, =0x1a2b3c4d5e6f7788
-	bl	phex64
-	b	.
+// print current EL
+	mrs	x0, CurrentEL
+	ubfm	w0, w0, #2, #31
+	add	w0, w0, '0'
+	bl	putch
+	b	eol
 
 .section ".rodata"
-hello_world:
-	.asciz "TEST test TeSt\r\n"
+current_el:
+	.asciz "Current EL = EL"
