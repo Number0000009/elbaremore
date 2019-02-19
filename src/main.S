@@ -25,6 +25,8 @@ primary_cpu_continue:
 	bl	putch
 	writeln crlf
 
+	hlt #17
+
 // End
 	bomb
 
