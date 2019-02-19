@@ -25,6 +25,9 @@ primary_cpu_continue:
 	bl	putch
 	writeln crlf
 
+// End
+	bomb
+
 .section ".rodata"
 current_el:
 	.asciz "Current EL = EL"
