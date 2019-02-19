@@ -41,16 +41,3 @@ phex64:
 	sub	x28, x28, #1
 	cbnz	x28, 1b
 	ret	x29
-
-// Print CRLF
-// Input: none
-// Corrupts: x0, x1, x2, x29
-	.global eol
-eol:
-	mov	x29, lr
-	writeln crlf
-	ret	x29
-
-.section ".rodata"
-crlf:
-	.asciz "\r\n"

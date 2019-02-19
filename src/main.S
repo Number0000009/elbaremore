@@ -19,8 +19,10 @@ primary_cpu_continue:
 	ubfm	w0, w0, #2, #31
 	add	w0, w0, '0'
 	bl	putch
-	b	eol
+	writeln crlf
 
 .section ".rodata"
 current_el:
 	.asciz "Current EL = EL"
+crlf:
+	.asciz "\r\n"
