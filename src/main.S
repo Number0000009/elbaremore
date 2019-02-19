@@ -10,4 +10,13 @@ main:
 	b	.-4
 
 primary_cpu_continue:
+	adr	x0, hello_world
+	bl	writeln
+
+	ldr	x0, =0x1a2b3c4d5e6f7788
+	bl	phex64
 	b	.
+
+.section ".rodata"
+hello_world:
+	.asciz "TEST test TeSt\r\n"

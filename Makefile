@@ -3,8 +3,9 @@ CROSS_COMPILE ?= aarch64-linux-gnu-
 CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)ld
 
-COMMODITIES := main.o
-SRC := src/main.S
+SRC := src/main.S src/uart.S
+INCLUDE := -I include
+OBJECTS := main.o uart.o
 OUTPUT := main
 
 CFLAGS := \
@@ -17,8 +18,8 @@ CFLAGS := \
 LDFLAGS := -T linker.lds
 
 all:
-	$(CC) $(CFLAGS) $(SRC) -c
-	$(LD) $(LDFLAGS) $(COMMODITIES) -o $(OUTPUT)
+	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) -c
+	$(LD) $(LDFLAGS) $(OBJECTS) -o $(OUTPUT)
 
 clean:
-	rm $(OUTPUT) $(COMMODITIES)
+	rm $(OUTPUT) $(OBJECTS)
