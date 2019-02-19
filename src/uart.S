@@ -5,6 +5,7 @@
 
 #include <platform.inc>
 #include <global.inc>
+#include <uart_macros.inc>
 
 // Transmit a character at default baud rate, 8n1
 // Input: w0 - char
@@ -18,21 +19,6 @@ putch:
 	b.eq	1b
 	strb	w0, [x1, #PL011_UARTDR]
 	ret
-
-// Print asciiz line
-// Input: x0 - asciz string address
-// Corrupts: x0, x1, x2, x3, x29
-	.global writeln
-writeln:
-	mov	x29, lr
-	mov	x3, x0
-1:
-	ldrb	w0, [x3], #1
-	cbz	w0, 2f
-	bl	putch
-	b	1b
-2:
-	ret	x29
 
 // Print 64-bit hex integer in long form i.e. 0042 - > 0042
 // Input: x0 - 64-bit integer to output
@@ -62,8 +48,7 @@ phex64:
 	.global eol
 eol:
 	mov	x29, lr
-	adr	x0, crlf
-	bl	writeln
+	writeln crlf
 	ret	x29
 
 .section ".rodata"

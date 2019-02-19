@@ -1,3 +1,6 @@
+#include <uart_macros.inc>
+#include <bomb_macros.inc>
+
 	.global main
 main:
 // Park secondary cores
@@ -6,12 +9,10 @@ main:
 	b.eq	primary_cpu_continue
 
 // TODO: read mailbox
-	wfe
-	b	.-4
+	bomb
 
 primary_cpu_continue:
-	adr	x0, current_el
-	bl	writeln
+	writeln current_el
 
 // print current EL
 	mrs	x0, CurrentEL
