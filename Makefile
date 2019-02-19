@@ -3,9 +3,9 @@ CROSS_COMPILE ?= aarch64-linux-gnu-
 CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)ld
 
-SRC := src/main.S src/uart.S
+SRC := src/main.S src/uart.S src/vectors.S
 INCLUDE := -I include
-OBJECTS := main.o uart.o
+OBJECTS := main.o uart.o vectors.o
 OUTPUT := main
 
 CFLAGS := \

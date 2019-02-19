@@ -12,6 +12,10 @@ main:
 	bomb
 
 primary_cpu_continue:
+	adr	x0, el3_vectors
+	msr	vbar_el3, x0
+	isb
+
 	writeln current_el
 
 // print current EL
