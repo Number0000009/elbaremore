@@ -4,7 +4,7 @@
 	.global main
 main:
 // Park secondary cores
-	mrs	x0, mpidr_el1
+	mrs	x0, MPIDR_EL1
 	tst	x0, #0x0f	// not b0000 (not a primary CPU) - goto stop
 	b.eq	primary_cpu_continue
 
@@ -13,7 +13,7 @@ main:
 
 primary_cpu_continue:
 	adr	x0, el3_vectors
-	msr	vbar_el3, x0
+	msr	VBAR_EL3, x0
 	isb
 
 	writeln current_el
