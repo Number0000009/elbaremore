@@ -15,6 +15,7 @@ cmd="${MODEL} \
 	-C cluster0.NUM_CORES=${CPUS} \
 	-C cache_state_modelled=0 \
 	-C bp.pl011_uart0.uart_enable=1 \
+	-C bp.dram_size=8 \
 	$(eval for i in \{0..${MAXCORE}\}\; do echo '-a 'cluster0.cpu\$i=${IMAGE}\; done)"
 
 	$cmd
