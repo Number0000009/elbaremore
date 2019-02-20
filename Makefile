@@ -19,7 +19,7 @@ LDFLAGS := -T linker.lds
 
 all:
 	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) -c
-	$(LD) $(LDFLAGS) $(OBJECTS) -o $(OUTPUT)
+	$(LD) $(OBJECTS) -o $(OUTPUT) $(LDFLAGS)
 
 clean:
 	rm $(OUTPUT) $(OBJECTS)

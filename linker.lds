@@ -22,6 +22,10 @@ MEMORY
         .DRAM2 : ORIGIN = 0x880000000, LENGTH = 0x17fffffff
 }
 
+TARGET(binary)
+INPUT(./Image)
+INPUT(./fdt.dtb)
+
 OUTPUT_FORMAT("elf64-littleaarch64")
 OUTPUT_ARCH(aarch64)
 SECTIONS
@@ -35,6 +39,18 @@ SECTIONS
         .rodata : {
                 . = ALIGN(8);
                 *(.rodata)
+        } >.TBROM
+
+        .kernel : {
+                . = ALIGN(8);
+                kernel_image = .;
+                ./Image
+        } >.TBROM
+
+        .dtb : {
+                . = ALIGN(8);
+                dtb_image = .;
+                ./fdt.dtb
         } >.TBROM
 
         .data : {

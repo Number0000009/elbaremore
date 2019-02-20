@@ -2,6 +2,8 @@
 Baremetal boot environment.
 
 ## Builing and running
+Make sure to copy a Linux kernel image as `Image` and dtb as `fdt.dtb` (for more info take a look at the linker script).
+
 	make
 	./run.sh
 

@@ -3,10 +3,9 @@
 
 // TODO: unhardcode this
 KERNEL_ADDR = 0x80000000
-// TODO: what address?
-DTB_ADDR = 0xF0000000
+DTB_ADDR = 0x80800000
 
-KERNEL_ENTRY_POINT = 0x80001000
+KERNEL_ENTRY_POINT = 0x80080000
 
 	.global main
 main:
@@ -33,19 +32,30 @@ primary_cpu_continue:
 	writeln crlf
 
 // Relocate kernel
-	ldr	x0, =KERNEL_ADDR
-	writeln relocate_kernel
+	writeln relocate_kernel_from
+	ldr	x0, =kernel_image
+	bl	phex64
+	writeln crlf
+
+	writeln relocate_kernel_to
 	ldr	x0, =KERNEL_ADDR
 	bl	phex64
 	writeln crlf
 
-// TODO: is this needed?
+// TODO: relocate
+
 // Relocate DTB
-	ldr	x0, =DTB_ADDR
-	writeln relocate_dtb
+	writeln relocate_dtb_from
+	ldr	x0, =dtb_image
+	bl	phex64
+	writeln crlf
+
+	writeln relocate_dtb_to
 	ldr	x0, =DTB_ADDR
 	bl	phex64
 	writeln crlf
+
+// TODO: relocate
 
 /*
  * Per linux/Documentation/arm64/booting.txt
@@ -96,9 +106,13 @@ current_el:
 	.asciz "Current EL = EL"
 crlf:
 	.asciz "\r\n"
-relocate_kernel:
-	.asciz "Relocating kernel to "
-relocate_dtb:
-	.asciz "Relocating DTB to "
+relocate_kernel_from:
+	.asciz "Relocating kernel from 0x"
+relocate_kernel_to:
+	.asciz "to 0x"
+relocate_dtb_from:
+	.asciz "Relocating DTB from 0x"
+relocate_dtb_to:
+	.asciz "to 0x"
 enter:
 	.asciz "Jump into the fire\r\n"
