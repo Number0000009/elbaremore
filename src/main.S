@@ -33,26 +33,22 @@ primary_cpu_continue:
 
 // Relocate kernel
 	writeln relocate_kernel_from
-	ldr	x0, =kernel_image
-	bl	phex64
+	phex64 kernel_image
 	writeln crlf
 
 	writeln relocate_kernel_to
-	ldr	x0, =KERNEL_ADDR
-	bl	phex64
+	phex64 KERNEL_ADDR
 	writeln crlf
 
 // TODO: relocate
 
 // Relocate DTB
 	writeln relocate_dtb_from
-	ldr	x0, =dtb_image
-	bl	phex64
+	phex64 dtb_image
 	writeln crlf
 
 	writeln relocate_dtb_to
-	ldr	x0, =DTB_ADDR
-	bl	phex64
+	phex64 DTB_ADDR
 	writeln crlf
 
 // TODO: relocate
@@ -109,10 +105,10 @@ crlf:
 relocate_kernel_from:
 	.asciz "Relocating kernel from 0x"
 relocate_kernel_to:
-	.asciz "to 0x"
+	.asciz "\tto 0x"
 relocate_dtb_from:
 	.asciz "Relocating DTB from 0x"
 relocate_dtb_to:
-	.asciz "to 0x"
+	.asciz "\tto 0x"
 enter:
 	.asciz "Jump into the fire\r\n"
