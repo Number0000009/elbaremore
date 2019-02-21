@@ -43,14 +43,16 @@ SECTIONS
 
         .kernel : {
                 . = ALIGN(8);
-                kernel_image = .;
+                kernel_image_start = .;
                 ./Image
+                kernel_image_end = .;
         } >.TBROM
 
         .dtb : {
                 . = ALIGN(8);
-                dtb_image = .;
+                dtb_image_start = .;
                 ./fdt.dtb
+                dtb_image_end = .;
         } >.TBROM
 
         .data : {

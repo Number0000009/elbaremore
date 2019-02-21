@@ -2,10 +2,10 @@
 #include <bomb_macros.inc>
 
 // TODO: unhardcode this
-KERNEL_ADDR = 0x80000000
+KERNEL_ADDR = 0x80080000
 DTB_ADDR = 0x80800000
 
-KERNEL_ENTRY_POINT = 0x80080000
+KERNEL_ENTRY_POINT = KERNEL_ADDR
 
 	.global main
 main:
@@ -33,25 +33,49 @@ primary_cpu_continue:
 
 // Relocate kernel
 	writeln relocate_kernel_from
-	phex64 kernel_image
+	phex64 kernel_image_start
 	writeln crlf
 
 	writeln relocate_kernel_to
 	phex64 KERNEL_ADDR
 	writeln crlf
 
-// TODO: relocate
+// TODO: relocate. fix tail
+	ldr	x2, =(kernel_image_end)
+	ldr	x0, =(kernel_image_start)
+	sub	x2, x2, x0
+	lsr	x2, x2, #4
+
+	ldr	x0, =(kernel_image_start - 16)
+	ldr	x1, =(KERNEL_ADDR - 16)
+reloc1:
+	ldp	x3, x4, [x0, #16]!
+	stp	x3, x4, [x1, #16]!
+	subs	x2, x2, #1
+	b.ne	reloc1
 
 // Relocate DTB
 	writeln relocate_dtb_from
-	phex64 dtb_image
+	phex64 dtb_image_start
 	writeln crlf
 
 	writeln relocate_dtb_to
 	phex64 DTB_ADDR
 	writeln crlf
 
-// TODO: relocate
+// TODO: relocate. fix tail
+	ldr	x2, =(dtb_image_end)
+	ldr	x0, =(dtb_image_start)
+	sub	x2, x2, x0
+	lsr	x2, x2, #4
+
+	ldr	x0, =(dtb_image_start - 16)
+	ldr	x1, =(DTB_ADDR - 16)
+reloc2:
+	ldp	x3, x4, [x0, #16]!
+	stp	x3, x4, [x1, #16]!
+	subs	x2, x2, #1
+	b.ne	reloc2
 
 /*
  * Per linux/Documentation/arm64/booting.txt
@@ -79,7 +103,27 @@ primary_cpu_continue:
 	orr	x0, x0, ICC_SRE_EL3_SRE
 	msr	ICC_SRE_EL3, x0
 
-// TODO: setup scr_el3
+	mov	x0, xzr
+	msr	ICC_CTLR_EL3, x0
+
+	ldr	x1, =(GIC_RDIST_WAKER)
+	ldr	w0, [x1]
+	and	w0, w0, ~GICR_WAKER_ProcessorSleep
+	str	w0, [x1]
+
+// SGI
+	ldr	x1, =(GIC_RDIST_BASE + 0x10000 + GICR_IGROUP0)
+	mvn	w0, wzr
+	str	w0, [x1]
+
+	ldr	x1, =(GIC_RDIST_BASE + 0x10000 + GICR_IGRPMOD0)
+	mov	w0, wzr
+	str	w0, [x1]
+
+	mov	x0, xzr
+	orr	x0, x0, SCR_RW
+	orr	x0, x0, SCR_NS
+	msr	SCR_EL3, x0
 
 	ldr	x0, =SPSR_KERNEL
 	msr	spsr_el3, x0
