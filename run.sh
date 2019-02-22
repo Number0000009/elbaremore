@@ -17,6 +17,8 @@ cmd="${MODEL} \
 	-C bp.pl011_uart0.uart_enable=1 \
 	-C bp.dram_size=8 \
 	-C bp.secure_memory=0 \
+	-C bp.refcounter.non_arch_start_at_default=1 \
+	-C bp.refcounter.use_real_time=0 \
 	$(eval for i in \{0..${MAXCORE}\}\; do echo '-a 'cluster0.cpu\$i=${IMAGE}\; done)"
 
 	$cmd
