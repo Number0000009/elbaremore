@@ -126,10 +126,10 @@ reloc2:
 	msr	SCR_EL3, x0
 
 	ldr	x0, =SPSR_KERNEL
-	msr	spsr_el3, x0
+	msr	SPSR_EL3, x0
 
 	ldr	x0, =KERNEL_ENTRY_POINT
-	msr	elr_el3, x0
+	msr	ELR_EL3, x0
 
 	ldr	x0, =DTB_ADDR
 	mov	x1, xzr
