@@ -29,16 +29,16 @@ primary_cpu_continue:
 	ubfm	w0, w0, #2, #31
 	add	w0, w0, '0'
 	bl	putch
-	writeln crlf
+	writecrlf
 
 // Relocate kernel
 	writeln relocate_kernel_from
 	phex64 kernel_image_start
-	writeln crlf
+	writecrlf
 
 	writeln relocate_kernel_to
 	phex64 KERNEL_ADDR
-	writeln crlf
+	writecrlf
 
 // TODO: relocate. fix tail
 	ldr	x2, =(kernel_image_end)
@@ -57,11 +57,11 @@ reloc1:
 // Relocate DTB
 	writeln relocate_dtb_from
 	phex64 dtb_image_start
-	writeln crlf
+	writecrlf
 
 	writeln relocate_dtb_to
 	phex64 DTB_ADDR
-	writeln crlf
+	writecrlf
 
 // TODO: relocate. fix tail
 	ldr	x2, =(dtb_image_end)
@@ -144,8 +144,6 @@ reloc2:
 .section ".rodata"
 current_el:
 	.asciz "Current EL = EL"
-crlf:
-	.asciz "\r\n"
 relocate_kernel_from:
 	.asciz "Relocating kernel from 0x"
 relocate_kernel_to:
@@ -156,3 +154,7 @@ relocate_dtb_to:
 	.asciz "\tto 0x"
 enter:
 	.asciz "Jump into the fire\r\n"
+
+	.global crlf
+crlf:
+	.asciz "\r\n"

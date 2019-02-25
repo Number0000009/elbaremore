@@ -61,3 +61,10 @@
 
 	mov	lr, x29
 	.endm
+
+// Print CR-LF
+// Input:
+// Corrupts: x0, x1, x2, x3, x29
+	.macro writecrlf
+	writeln crlf
+	.endm
