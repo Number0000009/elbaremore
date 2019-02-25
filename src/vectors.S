@@ -2,6 +2,10 @@
 #include <uart_macros.inc>
 #include <bomb_macros.inc>
 
+// TODO: unhardcode this
+// TODO: is Trusted DRAM OK, or should it be Trusted SRAM?
+EL3_STACK_ADDR = 0x06000000
+
 // TODO: this should be living in Trusted Boot ROM
 	.global el3_vectors
 
@@ -55,30 +59,82 @@ el3_vector_sync_lel:
 	msr	DAIFset, #0xf
 
 // Per ARM DEN 0070A X9...X15 are temporary registers
-	mrs	x10, ESR_EL3
-	and	x11, x10, #ESR_EC
-	and	x12, x10, #ESR_ISS
+	mrs	x9, ESR_EL3
+	and	x10, x9, #ESR_EC
 
-	ldr	x10, =ESR_EC_SMC
+	ldr	x11, =ESR_EC_SMC
 	cmp	x11, x10
 	b.ne	.default
 
-	cmp	x12, #ESR_ISS_RMV
-	b.ne	.default
+	and	x10, x9, #ESR_ISS
+	cmp	x10, #ESR_ISS_RMV
+	b.eq	.rmv_call
 
-// RMV call
-	mov	x9, x0
-	writeln rmv_call
-	prhex64 x9
+	cmp	x10, #ESR_ISS_RMV_RETURN
+	b.eq	.rmv_return
+
+	b	.default
+
+.rmv_return:
+	writeln rmv_return
+	ldr	x0, [sp, #0]
+	prhex64 x0
 	writeln crlf
 
-	mov	x10, x30
-	bl	goto_sel2
-	mov	x30, x10
+// return_from_sel2
+// restore context
+	ldp	x0, x1, [sp, #80]
+	ldp	x2, x3, [sp, #96]
+	ldr	x30,	[sp, #112]
+	msr	SCR_EL3, x0
+	msr	SCTLR_EL2, x1
+	msr	SPSR_EL3, x2
+	msr	ELR_EL3, x3
 
-	mov	x0, x9
+	ldp	x0, x1, [sp, #0]
+	ldp	x2, x3, [sp, #16]
+	ldp	x4, x5, [sp, #32]
+	ldp	x6, x7, [sp, #48]
+	ldp	x8, x9, [sp, #64]
+// TODO: is this enough?
+
 	msr	DAIFclr, #0xf
 	eret
+
+// Must not reach here
+	writeln unreachable
+	bomb
+
+.rmv_call:
+// TODO: not the whole context, just per SMCCC + sysregs
+	ldr	x9, =EL3_STACK_ADDR
+	mov	sp, x9
+	stp	x0, x1, [sp, #0]
+	stp	x2, x3, [sp, #16]
+	stp	x4, x5, [sp, #32]
+	stp	x6, x7, [sp, #48]
+	stp	x8, x9, [sp, #64]
+// TODO: is this enough?
+
+	mrs	x0, SCR_EL3
+	mrs	x1, SCTLR_EL2
+	mrs	x2, SPSR_EL3
+	mrs	x3, ELR_EL3
+	stp	x0, x1, [sp, #80]
+	stp	x2, x3, [sp, #96]
+	str	x30,	[sp, #112]
+
+	writeln rmv_call
+	ldr	x0, [sp, #0]
+	prhex64 x0
+	writeln crlf
+
+// No exit from there
+	b	goto_sel2
+
+// Must not reach here
+	writeln unreachable
+	bomb
 
 .default:
 	writeln abt_sync_lel
@@ -120,41 +176,38 @@ el3_vector_serror_lel_32:
 	writeln abt_serror_lel_a32
 	bomb
 
-
+// -----------------------------------------------------------------------------
 goto_sel2:
-	mrs	x0, SCR_EL3
-
-// TODO: save context
-	mov	x13, x0
-	mrs	x14, SCTLR_EL2
-
-	bic	x0, x0, SCR_NS
-	orr	x0, x0, SCR_EEL2
+	mov	x0, xzr
+	bic	x0, x0, SCR_NS		// Secure, probably redundant
+	orr	x0, x0, SCR_EEL2	// SEL2
 	msr	SCR_EL3, x0
 
-	bic	x0, x14, SCTLR_M
+	mov	x0, xzr
 	msr	SCTLR_EL2, x0
 
+// TODO: is SPSR_SEL2 different from SPSR_KERNEL?
 	ldr	x0, =SPSR_SEL2
 	msr	SPSR_EL3, x0
 
-//	ldr	x0, =SEL2_ENTRY_POINT
 	ldr	x0, =sel2_entry_point
 	msr	ELR_EL3, x0
-
-b .
 	eret
 
-	mov	x0, x13
-	msr	SCTLR_EL2, x14
-	ret
+// Must not reach here
+	writeln unreachable
+	bomb
 
-
-
+// ------------------------------
+// This is executed at Secure EL2
 sel2_entry_point:
 	writeln hi_from_sel2
-	eret
+	mov	x0, 0x42
+	smc	#ESR_ISS_RMV_RETURN
 
+// Must not reach here
+	writeln unreachable
+	bomb
 
 .section ".rodata"
 abt_sync_sp0:
@@ -195,6 +248,9 @@ abt_serror_lel_a32:
 
 rmv_call:
 	.asciz "RMV call X0=0x"
-
 hi_from_sel2:
 	.asciz "Hi from S-EL2\r\n"
+rmv_return:
+	.asciz "Bye from S-EL2\r\n"
+unreachable:
+	.asciz "What r u doing here, bro?\r\n"
