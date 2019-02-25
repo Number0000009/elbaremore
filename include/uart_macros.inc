@@ -16,7 +16,7 @@
 	.endm
 
 // Print 64-bit hex integer in long form i.e. 0042 - > 0042
-// Input: x0 - 64-bit integer to output
+// Input: number - 64-bit integer to output
 // Corrupts x0, x1, x2, x3, x27, x28, x29
 	.macro phex64, number
 	mov	x29, lr
