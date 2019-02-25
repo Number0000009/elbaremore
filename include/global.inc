@@ -11,6 +11,11 @@
 
 #define SPSR_KERNEL	(SPSR_A | SPSR_D | SPSR_I | SPSR_F | SPSR_EL2H)
 
+#define ESR_EC		(0b111111 << 26)
+#define ESR_ISS		(0b111111111111111111111111 << 0)
+#define ESR_EC_SMC	(0b010111 << 26)
+#define ESR_ISS_RMV	666
+
 // Taken from boot-wrapper arch/aarch64/include/asm/gic-v3.h
 #define ICC_SRE_EL3	S3_6_C12_C12_5
 #define ICC_CTLR_EL3	S3_6_C12_C12_4

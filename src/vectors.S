@@ -52,6 +52,30 @@ el3_vector_serror_spx:
 // 0x400 - 0x600
 .balign 0x80
 el3_vector_sync_lel:
+	msr	DAIFset, #0xf
+
+// Per ARM DEN 0070A X9...X15 are temporary registers
+	mrs	x10, ESR_EL3
+	and	x11, x10, #ESR_EC
+	and	x12, x10, #ESR_ISS
+
+	ldr	x10, =ESR_EC_SMC
+	cmp	x11, x10
+	b.ne	.default
+
+	cmp	x12, #ESR_ISS_RMV
+	b.ne	.default
+
+// RMV call
+	mov	x9, x0
+	writeln rmv_call
+	prhex64 x9
+	writeln crlf
+	mov	x0, x9
+	msr	DAIFclr, #0xf
+	eret
+
+.default:
 	writeln abt_sync_lel
 	bomb
 
@@ -127,3 +151,6 @@ abt_fiq_lel_a32:
 	.asciz "Lower EL using AArch32: FIQ/vFIQ!\r\n"
 abt_serror_lel_a32:
 	.asciz "Lower EL using AArch32: SError/vSError!\r\n"
+
+rmv_call:
+	.asciz "RMV call X0=0x"
