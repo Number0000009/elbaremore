@@ -10,6 +10,7 @@
 #define SPSR_HYP	(0x1a << 0)	/* M[3:0] = hyp, M[4] = AArch32 */
 
 #define SPSR_KERNEL	(SPSR_A | SPSR_D | SPSR_I | SPSR_F | SPSR_EL2H)
+#define SPSR_SEL2	(SPSR_A | SPSR_D | SPSR_I | SPSR_F | SPSR_EL2H)
 
 #define ESR_EC		(0b111111 << 26)
 #define ESR_ISS		(0b111111111111111111111111 << 0)
@@ -34,16 +35,16 @@
 
 #define ICC_SRE_EL3_Enable	(1 << 3)	/* EL2 accesses to ICC_SRE_EL1
 						 * and ICC_SRE_EL2 do not
-						 * trap to EL3.
-						 */
+						 * trap to EL3. */
 #define ICC_SRE_EL3_SRE		(1 << 0)	/* The System register
 						 * interface to the ICH_*
 						 * registers and the EL1, EL2,
 						 * and EL3 ICC_* registers is
-						 * enabled for EL3.
-						 */
+						 * enabled for EL3. */
 
 #define SCR_RW		(1 << 10)	/* The next lower level is AArch64. */
 #define SCR_NS		(1 << 0)	/* Exception levels lower than
-					 * EL3 are in Non-secure state.
-					 */
+					 * EL3 are in Non-secure state. */
+#define SCR_EEL2	(1 << 18)	/* All behaviors associated with
+					 * Secure EL2 are enabled */
+#define SCTLR_M		(1 << 0)	/* MMU disabled */

@@ -71,6 +71,11 @@ el3_vector_sync_lel:
 	writeln rmv_call
 	prhex64 x9
 	writeln crlf
+
+	mov	x10, x30
+	bl	goto_sel2
+	mov	x30, x10
+
 	mov	x0, x9
 	msr	DAIFclr, #0xf
 	eret
@@ -115,6 +120,42 @@ el3_vector_serror_lel_32:
 	writeln abt_serror_lel_a32
 	bomb
 
+
+goto_sel2:
+	mrs	x0, SCR_EL3
+
+// TODO: save context
+	mov	x13, x0
+	mrs	x14, SCTLR_EL2
+
+	bic	x0, x0, SCR_NS
+	orr	x0, x0, SCR_EEL2
+	msr	SCR_EL3, x0
+
+	bic	x0, x14, SCTLR_M
+	msr	SCTLR_EL2, x0
+
+	ldr	x0, =SPSR_SEL2
+	msr	SPSR_EL3, x0
+
+//	ldr	x0, =SEL2_ENTRY_POINT
+	ldr	x0, =sel2_entry_point
+	msr	ELR_EL3, x0
+
+b .
+	eret
+
+	mov	x0, x13
+	msr	SCTLR_EL2, x14
+	ret
+
+
+
+sel2_entry_point:
+	writeln hi_from_sel2
+	eret
+
+
 .section ".rodata"
 abt_sync_sp0:
 	.asciz "Current EL with SP0: Synchronous abort!\r\n"
@@ -154,3 +195,6 @@ abt_serror_lel_a32:
 
 rmv_call:
 	.asciz "RMV call X0=0x"
+
+hi_from_sel2:
+	.asciz "Hi from S-EL2\r\n"
