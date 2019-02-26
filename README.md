@@ -4,6 +4,14 @@ Baremetal boot environment.
 ## Builing and running
 Make sure to copy a Linux kernel image as `Image` and dtb as `fdt.dtb` (for more info take a look at the linker script).
 
+Device tree must contain the following node:
+
+	chosen {
+	bootargs = "mem=2G console=ttyAMA0 earlyprintk=pl011,0x1c090000";
+	};
+
+Then:
+
 	make
 	./run.sh
 
@@ -11,8 +19,9 @@ Make sure to copy a Linux kernel image as `Image` and dtb as `fdt.dtb` (for more
 A *minimal* boot environment.
 
 - Reserve a fucking EL3 stack already, otherwise it's all fiddly when preserving caller registers when calling routines;
-- Currently only booting primary core, add SMP;
 - SMC ping-pong
+- Refactor
+- Add TZC-400 support for actual memory/io filtering? Currently secure memory modelling is disabled, although we do payload (Linux kernel with DTB) relocation from Trusted Boot ROM to DRAM bank 1, which is kinda stupid without having the actual secure memory enabled?
 
 ## BUGS
 - UART divider might need a proper initialization on devboards (works with fvp as is, though)
