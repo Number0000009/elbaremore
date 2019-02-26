@@ -217,5 +217,7 @@ hi_from_sel2:
 	.asciz "Hi from S-EL2\r\n"
 rmv_return:
 	.asciz "Bye from S-EL2\r\n"
+
+	.global unreachable
 unreachable:
 	.asciz "What r u doing here, bro?\r\n"

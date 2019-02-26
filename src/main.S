@@ -138,7 +138,8 @@ reloc2:
 
 	eret
 
-// End
+// Must not reach here
+	writeln unreachable
 	bomb
 
 .section ".rodata"
