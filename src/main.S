@@ -7,21 +7,56 @@ DTB_ADDR = 0x80800000
 
 KERNEL_ENTRY_POINT = KERNEL_ADDR
 
+// Taken from foundation-v8-spin-table.dtsi
+MAILBOX = 0x8000fff8
+
 	.global main
 main:
-// Park secondary cores
-	mrs	x0, MPIDR_EL1
-	tst	x0, #0x0f	// not b0000 (not a primary CPU) - goto stop
-	b.eq	primary_cpu_continue
-
-// TODO: read mailbox
-	bomb
-
-primary_cpu_continue:
 	adr	x0, el3_vectors
 	msr	VBAR_EL3, x0
 	isb
 
+	ldr	x0, =MAILBOX
+	str	xzr, [x0]
+
+// TODO: dmb?
+
+	mrs	x0, ICC_SRE_EL3
+// TODO: let's combine this together later
+// Enable ICC_SRE_EL2 access from EL2
+	orr	x0, x0, ICC_SRE_EL3_Enable
+// Enable System register interface to the ICC_* for EL3 and ICH_* from EL2 and EL1
+	orr	x0, x0, ICC_SRE_EL3_SRE
+	msr	ICC_SRE_EL3, x0
+
+	mov	x0, xzr
+	msr	ICC_CTLR_EL3, x0
+
+	orr	x0, x0, SCR_RW
+	orr	x0, x0, SCR_NS
+	msr	SCR_EL3, x0
+
+	ldr	x0, =SPSR_KERNEL
+	msr	SPSR_EL3, x0
+
+	mrs	x0, MPIDR_EL1
+	tst	x0, #0x0f	// primary core = 0b0000
+	b.eq	primary_cpu_continue
+
+	ldr	x0, =.el2_continue
+	msr	ELR_EL3, x0
+	eret
+
+.el2_continue:
+	ldr	x1, =MAILBOX
+	sevl
+.wait:
+	wfe
+	ldr	x0, [x1]
+	cbz	x0, .wait
+	br	x0
+
+primary_cpu_continue:
 	writeln current_el
 
 // print current EL
@@ -93,44 +128,30 @@ reloc2:
  *   ICC_SRE_EL2.SRE (bit 0) must be initialised to 0b1.
  * - The DT or ACPI tables must describe a GICv3 interrupt controller.
 */
-	writeln enter
-
-	mov	x0, xzr
-// TODO: let's combine this together later
-// Enable ICC_SRE_EL2 access from EL2
-	orr	x0, x0, ICC_SRE_EL3_Enable
-// Enable System register interface to the ICC_* for EL3 and ICH_* from EL2 and EL1
-	orr	x0, x0, ICC_SRE_EL3_SRE
-	msr	ICC_SRE_EL3, x0
-
-	mov	x0, xzr
-	msr	ICC_CTLR_EL3, x0
-
-	ldr	x1, =(GIC_RDIST_WAKER)
-	ldr	w0, [x1]
+	mov	x1, #GIC_RDIST_BASE
+.gicv3_wakeup:
+	ldr	w0, [x1, #GICR_WAKER]
 	and	w0, w0, ~GICR_WAKER_ProcessorSleep
-	str	w0, [x1]
+	str	w0, [x1, #GICR_WAKER]
+
+	ldr	w2, [x1, #GICR_TYPER]
 
 // SGI
-	ldr	x1, =(GIC_RDIST_BASE + 0x10000 + GICR_IGROUP0)
+	add	x1, x1, #0x10000
 	mvn	w0, wzr
-	str	w0, [x1]
+	str	w0, [x1, #GICR_IGROUP0]
 
-	ldr	x1, =(GIC_RDIST_BASE + 0x10000 + GICR_IGRPMOD0)
 	mov	w0, wzr
-	str	w0, [x1]
+	str	w0, [x1, #GICR_IGRPMOD0]
 
-	mov	x0, xzr
-	orr	x0, x0, SCR_RW
-	orr	x0, x0, SCR_NS
-	msr	SCR_EL3, x0
+	add	x1, x1, #0x10000
 
-	ldr	x0, =SPSR_KERNEL
-	msr	SPSR_EL3, x0
+	tbz	x2, #GICR_TYPER_Last_BIT, .gicv3_wakeup
 
 	ldr	x0, =KERNEL_ENTRY_POINT
 	msr	ELR_EL3, x0
 
+	writeln enter_kernel
 	ldr	x0, =DTB_ADDR
 	mov	x1, xzr
 	mov	x2, xzr
@@ -153,7 +174,7 @@ relocate_dtb_from:
 	.asciz "Relocating DTB from 0x"
 relocate_dtb_to:
 	.asciz "\tto 0x"
-enter:
+enter_kernel:
 	.asciz "Jump into the fire\r\n"
 
 	.global crlf

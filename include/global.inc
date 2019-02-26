@@ -26,15 +26,15 @@
 
 // Per boot-wrapper/gic-v3.c
 #define GICR_WAKER		0x14
+#define GICR_TYPER		0x8
 #define GICR_IGROUP0		0x80
 #define GICR_IGRPMOD0		0xD00
 
 #define GICR_WAKER_ProcessorSleep	(1 << 1)
+#define GICR_TYPER_Last_BIT		4
 
 // from arch/arm64/boot/dts/arm/foundation-v8-gicv3.dts
 #define GIC_RDIST_BASE		0x2f100000
-
-#define GIC_RDIST_WAKER		(GIC_RDIST_BASE + GICR_WAKER)
 
 #define ICC_SRE_EL3_Enable	(1 << 3)	/* EL2 accesses to ICC_SRE_EL1
 						 * and ICC_SRE_EL2 do not
