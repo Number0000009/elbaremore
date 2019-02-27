@@ -77,8 +77,9 @@ el3_vector_sync_lel:
 	b	.default
 
 .rmv_return:
+	mov	x9, x0
 	writeln rmv_return
-	ldr	x0, [sp, #0]
+	mov	x0, x9
 	prhex64 x0
 	writeln crlf
 
@@ -96,6 +97,10 @@ el3_vector_sync_lel:
 	ldp	x2, x3, [sp, #16]
 	ldp	x4, x5, [sp, #32]
 	ldp	x6, x7, [sp, #48]
+
+// restore mutated X0
+	mov	x0, x9
+
 	ldp	x8, x9, [sp, #64]
 // TODO: is this enough?
 
@@ -193,6 +198,9 @@ goto_sel2:
 
 	ldr	x0, =sel2_entry_point
 	msr	ELR_EL3, x0
+
+	ldr	x0, [sp, #0]	// X0
+
 	eret
 
 // Must not reach here
@@ -202,8 +210,10 @@ goto_sel2:
 // ------------------------------
 // This is executed at Secure EL2
 sel2_entry_point:
+	mov	x9, x0
 	writeln hi_from_sel2
-	mov	x0, 0x42
+	mov	x0, x9
+	add	x0, x0, #1
 	smc	#ESR_ISS_RMV_RETURN
 
 // Must not reach here
