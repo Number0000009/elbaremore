@@ -175,7 +175,7 @@ relocate_dtb_from:
 relocate_dtb_to:
 	.asciz "\tto 0x"
 enter_kernel:
-	.asciz "Jump into the fire\r\n"
+	.asciz "Booting Linux\r\n"
 
 	.global crlf
 crlf:
