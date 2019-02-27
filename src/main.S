@@ -28,9 +28,11 @@ main:
 // Enable System register interface to the ICC_* for EL3 and ICH_* from EL2 and EL1
 	orr	x0, x0, ICC_SRE_EL3_SRE
 	msr	ICC_SRE_EL3, x0
+	isb
 
 	mov	x0, xzr
 	msr	ICC_CTLR_EL3, x0
+	isb
 
 	orr	x0, x0, SCR_RW
 	orr	x0, x0, SCR_NS
