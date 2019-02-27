@@ -50,4 +50,7 @@
 					 * EL3 are in Non-secure state. */
 #define SCR_EEL2	(1 << 18)	/* All behaviors associated with
 					 * Secure EL2 are enabled */
+#define SCR_APK		(1 << 16)	/* AP key enable */
+#define SCR_API		(1 << 17)	/* AP insn enable */
+
 #define SCTLR_M		(1 << 0)	/* MMU disabled */
