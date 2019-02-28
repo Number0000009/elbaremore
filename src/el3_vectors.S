@@ -1,11 +1,14 @@
 #include <global.inc>
 #include <uart_macros.inc>
+#include <cpuid_macros.inc>
 #include <bomb_macros.inc>
 #include <vectors.inc>
 
 // TODO: unhardcode this
 // TODO: is Trusted DRAM OK, or should it be Trusted SRAM?
-EL3_STACK_ADDR = 0x06000000
+EL3_STORAGE_START = 0x06000000
+// TODO: is this enough?
+EL3_FRAME_SIZE = 0x1000
 
 // TODO: this should be living in Trusted Boot ROM
 	.global el3_vectors
@@ -69,8 +72,25 @@ el3_vector_sync_lel:
 
 	and	x10, x9, #ESR_ISS
 	cmp	x10, #ESR_ISS_RMV
-	b.eq	.rmv_call
+	b.ne	.is_not_rmv_call
+//is_rmv_call:
 
+/* Setup per cpu id storage frame
+ * This is not a stack as it grows from start to end:
+ * START			  END
+ * o-------o-------o-------o-------o
+ * ^\_____/^\_____/^\_____/^\_____/^
+ *  id = 0     1       2       3
+ */
+	mov	x9, #EL3_STORAGE_START
+	cpuid x10
+	mov	w11,#EL3_FRAME_SIZE
+	umaddl	x9, w10, w11, x9	// x9 = x9 + (w10 * w11)
+	mov	sp, x9
+
+	b	.rmv_call_handler
+
+.is_not_rmv_call:
 	cmp	x10, #ESR_ISS_RMV_RETURN
 	b.eq	.rmv_return
 
@@ -111,10 +131,8 @@ el3_vector_sync_lel:
 	writeln unreachable
 	bomb
 
-.rmv_call:
+.rmv_call_handler:
 // TODO: not the whole context, just per SMCCC + sysregs
-	ldr	x9, =EL3_STACK_ADDR
-	mov	sp, x9
 	stp	x0, x1, [sp, #0]
 	stp	x2, x3, [sp, #16]
 	stp	x4, x5, [sp, #32]
