@@ -107,11 +107,14 @@ el3_vector_sync_lel:
 // restore context
 	ldp	x0, x1, [sp, #80]
 	ldp	x2, x3, [sp, #96]
-	ldr	x30,	[sp, #112]
+	ldp	x4, x5, [sp, #112]
+	ldr	x30,	[sp, #128]
 	msr	SCR_EL3, x0
 	msr	SCTLR_EL2, x1
 	msr	SPSR_EL3, x2
 	msr	ELR_EL3, x3
+	msr	SPSR_EL2, x4
+	msr	ELR_EL2, x5
 
 	ldp	x0, x1, [sp, #0]
 	ldp	x2, x3, [sp, #16]
@@ -144,9 +147,12 @@ el3_vector_sync_lel:
 	mrs	x1, SCTLR_EL2
 	mrs	x2, SPSR_EL3
 	mrs	x3, ELR_EL3
+	mrs	x4, SPSR_EL2
+	mrs	x5, ELR_EL2
 	stp	x0, x1, [sp, #80]
 	stp	x2, x3, [sp, #96]
-	str	x30,	[sp, #112]
+	stp	x4, x5, [sp, #112]
+	str	x30,	[sp, #128]
 
 	writeln rmv_call
 	ldr	x0, [sp, #0]
