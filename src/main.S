@@ -117,22 +117,6 @@ reloc2:
 	subs	x2, x2, #1
 	b.ne	reloc2
 
-/*
- * Per linux/Documentation/arm64/booting.txt
- * jump into kernel
- * x0: FDT
- * x1 = 0, x2 = 0, x3 = 0: args
- * Destination EL = EL2
- *
- * For systems with a GICv3 interrupt controller to be used in v3 mode:
- * - If EL3 is present:
- *   ICC_SRE_EL3.Enable (bit 3) must be initialiased to 0b1.
- *   ICC_SRE_EL3.SRE (bit 0) must be initialised to 0b1.
- * - If the kernel is entered at EL1:
- *   ICC.SRE_EL2.Enable (bit 3) must be initialised to 0b1
- *   ICC_SRE_EL2.SRE (bit 0) must be initialised to 0b1.
- * - The DT or ACPI tables must describe a GICv3 interrupt controller.
-*/
 	mov	x1, #GIC_RDIST_BASE
 .gicv3_wakeup:
 	ldr	w0, [x1, #GICR_WAKER]
@@ -155,6 +139,23 @@ reloc2:
 
 	ldr	x0, =KERNEL_ENTRY_POINT
 	msr	ELR_EL3, x0
+
+/*
+ * Per linux/Documentation/arm64/booting.txt
+ * jump into kernel
+ * x0: FDT
+ * x1 = 0, x2 = 0, x3 = 0: args
+ * Destination EL = EL2
+ *
+ * For systems with a GICv3 interrupt controller to be used in v3 mode:
+ * - If EL3 is present:
+ *   ICC_SRE_EL3.Enable (bit 3) must be initialiased to 0b1.
+ *   ICC_SRE_EL3.SRE (bit 0) must be initialised to 0b1.
+ * - If the kernel is entered at EL1:
+ *   ICC.SRE_EL2.Enable (bit 3) must be initialised to 0b1
+ *   ICC_SRE_EL2.SRE (bit 0) must be initialised to 0b1.
+ * - The DT or ACPI tables must describe a GICv3 interrupt controller.
+*/
 
 	writeln enter_kernel
 	ldr	x0, =DTB_ADDR
