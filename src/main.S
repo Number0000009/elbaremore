@@ -1,5 +1,6 @@
 #include <uart_macros.inc>
 #include <bomb_macros.inc>
+#include <cpuid_macros.inc>
 
 // TODO: unhardcode this
 KERNEL_ADDR = 0x80080000
@@ -15,6 +16,8 @@ main:
 	adr	x0, el3_vectors
 	msr	VBAR_EL3, x0
 	isb
+
+	setup_stacks
 
 	ldr	x0, =MAILBOX
 	str	xzr, [x0]
@@ -79,22 +82,23 @@ primary_cpu_continue:
 	writecrlf
 
 // Relocate kernel
-	writeln relocate_kernel_from
-	phex64 kernel_image_start
-	writecrlf
-
-	writeln relocate_kernel_to
-	phex64 KERNEL_ADDR
-	writecrlf
 
 // TODO: relocate. fix tail
 	ldr	x2, =(kernel_image_end)
 	ldr	x0, =(kernel_image_start)
+
 	sub	x2, x2, x0
 	lsr	x2, x2, #4
 
 	ldr	x0, =(kernel_image_start - 16)
 	ldr	x1, =(KERNEL_ADDR - 16)
+
+	writeln relocate_kernel_from
+	prhex64 x0
+	writecrlf
+	writeln relocate_kernel_to
+	phex64 KERNEL_ADDR
+	writecrlf
 reloc1:
 	ldp	x3, x4, [x0, #16]!
 	stp	x3, x4, [x1, #16]!
@@ -102,14 +106,6 @@ reloc1:
 	b.ne	reloc1
 
 // Relocate DTB
-	writeln relocate_dtb_from
-	phex64 dtb_image_start
-	writecrlf
-
-	writeln relocate_dtb_to
-	phex64 DTB_ADDR
-	writecrlf
-
 // TODO: relocate. fix tail
 	ldr	x2, =(dtb_image_end)
 	ldr	x0, =(dtb_image_start)
@@ -118,6 +114,13 @@ reloc1:
 
 	ldr	x0, =(dtb_image_start - 16)
 	ldr	x1, =(DTB_ADDR - 16)
+
+	writeln relocate_dtb_from
+	prhex64 x0
+	writecrlf
+	writeln relocate_dtb_to
+	phex64 DTB_ADDR
+	writecrlf
 reloc2:
 	ldp	x3, x4, [x0, #16]!
 	stp	x3, x4, [x1, #16]!

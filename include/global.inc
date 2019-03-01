@@ -1,5 +1,16 @@
 #define lr x30
 
+// TODO: unhardcode this
+// TODO: is Trusted DRAM OK, or should it be Trusted SRAM?
+// TODO: is this enough?
+#define EL3_STORAGE_FRAME_SIZE 0x1000
+#define EL3_STACK_TOP (0x06000000 + 0x1ffffff)
+#define EL3_STACK_SIZE 0x4000
+
+#if EL3_STACK_SIZE <= EL3_STORAGE_FRAME_SIZE
+#error "Stack must be larger than context frame"
+#endif
+
 // Taken from bootwrapper arch/aarch64/include/asm/cpu.h
 #define SPSR_A		(1 << 8)	/* System Error masked */
 #define SPSR_D		(1 << 9)	/* Debug masked */

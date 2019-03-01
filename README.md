@@ -18,9 +18,9 @@ Then:
 ## TODO
 A *minimal* boot environment.
 
-- Reserve a fucking EL3 stack already, otherwise it's all fiddly when preserving caller registers when calling routines;
+- EL3 and S-EL2 have the same stack - split it up maybe?
+- Add SCR_EL3.NS validation
 - SMC ping-pong
-- Refactor
 - Add TZC-400 support for actual memory/io filtering? Currently secure memory modelling is disabled, although we do payload (Linux kernel with DTB) relocation from Trusted Boot ROM to DRAM bank 1, which is kinda stupid without having the actual secure memory enabled?
 
 ## BUGS

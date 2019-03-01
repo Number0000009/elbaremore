@@ -5,12 +5,6 @@
 #include <vectors.inc>
 #include <handlers.inc>
 
-// TODO: unhardcode this
-// TODO: is Trusted DRAM OK, or should it be Trusted SRAM?
-EL3_STORAGE_START = 0x06000000
-// TODO: is this enough?
-EL3_FRAME_SIZE = 0x1000
-
 // TODO: this should be living in Trusted Boot ROM
 	.global el3_vectors
 
@@ -79,7 +73,6 @@ el3_vector_sync_lel:
 	b.ne	.is_not_rmm_call	// SMC, but not to RMM
 //is_rmm_call:
 
-	setup_storage
 	b	.rmm_call_handler
 
 .is_not_rmm_call:

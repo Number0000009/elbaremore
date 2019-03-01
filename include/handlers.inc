@@ -1,20 +1,5 @@
 #include <rmm.inc>
-
-/* Setup per cpu id storage frame
- * This is not a stack as it grows from start to end:
- * START			  END
- * o-------o-------o-------o-------o
- * ^\_____/^\_____/^\_____/^\_____/^
- *  id = 0     1       2       3
- */
- // Corrupts: x9, x10, x11, sp
-	.macro setup_storage
-	mov	x9, #EL3_STORAGE_START
-	cpuid x10
-	mov	w11,#EL3_FRAME_SIZE
-	umaddl	x9, w10, w11, x9	// x9 = x9 + (w10 * w11)
-	mov	sp, x9
-	.endm
+#include <global.inc>
 
 .rmm_return:
 	mov	x9, x0
@@ -23,23 +8,26 @@
 	mov	x12, x3
 
 	writeln rmm_return
-	mov	x0, x9
-	prhex64 x0
+	prhex64 x9
 	writeln crlf
 
 // return_from_sel2
 // restore context minus x0-x3, x0-x3 come from SMC call args
 // TODO: what context should look like?
+// Context storage on stack, goes from bottom to top
+	sub	sp, sp, #EL3_STORAGE_FRAME_SIZE
+
 	ldp	x0, x1, [sp, #80]
 	ldp	x2, x3, [sp, #96]
 	ldp	x4, x5, [sp, #112]
-	ldr	x30,	[sp, #128]
+	ldp	x6, x30,[sp, #128]
 	msr	SCR_EL3, x0
 	msr	SCTLR_EL2, x1
 	msr	SPSR_EL3, x2
 	msr	ELR_EL3, x3
 	msr	SPSR_EL2, x4
 	msr	ELR_EL2, x5
+	msr	SP_EL2, x6
 
 	mov	x0, x9
 	mov	x1, x10
@@ -50,6 +38,9 @@
 	ldp	x6, x7, [sp, #48]
 	ldp	x8, x9, [sp, #64]
 
+// Delete storage and working stack
+	add	sp, sp, #EL3_STORAGE_FRAME_SIZE
+
 	msr	DAIFclr, #0xf
 	eret
 
@@ -58,6 +49,9 @@
 	bomb
 
 .rmm_call_handler:
+// Context storage on stack, goes from bottom to top
+	sub	sp, sp, #EL3_STORAGE_FRAME_SIZE
+
 // TODO: what context should look like?
 	stp	x0, x1, [sp, #0]
 	stp	x2, x3, [sp, #16]
@@ -70,13 +64,19 @@
 	mrs	x3, ELR_EL3
 	mrs	x4, SPSR_EL2
 	mrs	x5, ELR_EL2
+	mrs	x6, SP_EL2
 	stp	x0, x1, [sp, #80]
 	stp	x2, x3, [sp, #96]
 	stp	x4, x5, [sp, #112]
-	str	x30,	[sp, #128]
+	stp	x6, x30,[sp, #128]
+
+// Working stack, goes from top to bottom
+	add	sp, sp, #EL3_STORAGE_FRAME_SIZE
 
 	writeln rmm_call
-	ldr	x0, [sp, #0]	// X0
+
+	sub	x1, sp, #EL3_STORAGE_FRAME_SIZE
+	ldr	x0, [x1, #0]	// X0
 	prhex64 x0
 	writeln crlf
 
@@ -100,12 +100,17 @@ goto_sel2:
 	ldr	x0, =SPSR_SEL2
 	msr	SPSR_EL3, x0
 
+// TODO: EL3 and S-EL2 stacks should be different
+	mov	x0, sp
+	msr	sp_el2, x0
+
 	ldr	x0, =sel2_entry_point
 	msr	ELR_EL3, x0
 
 // Restore x0-x3 of RMC call
-	ldp	x0, x1, [sp, #0]
-	ldp	x2, x3, [sp, #16]
+	sub	x4, sp, #EL3_STORAGE_FRAME_SIZE
+	ldp	x0, x1, [x4, #0]
+	ldp	x2, x3, [x4, #16]
 
 	eret
 
