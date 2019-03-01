@@ -15,10 +15,10 @@
 #define ESR_EC		(0b111111 << 26)
 #define ESR_ISS		(0b111111111111111111111111 << 0)
 #define ESR_EC_SMC	(0b010111 << 26)
-// RMV call
-#define ESR_ISS_RMV		666
-// RMV request completed in S-EL2
-#define ESR_ISS_RMV_RETURN	777
+// RMM call
+#define ESR_ISS_RMM		666
+// RMM request completed in S-EL2
+#define ESR_ISS_RMM_RETURN	777
 
 // Taken from boot-wrapper arch/aarch64/include/asm/gic-v3.h
 #define ICC_SRE_EL3	S3_6_C12_C12_5

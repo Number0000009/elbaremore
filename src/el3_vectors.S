@@ -63,17 +63,20 @@ el3_vector_sync_lel:
 	msr	DAIFset, #0xf
 
 // Per ARM DEN 0070A X9...X15 are temporary registers
+// Validate SMC call issuer
+// 1. is this an SMC call?
 	mrs	x9, ESR_EL3
 	and	x10, x9, #ESR_EC
 
 	ldr	x11, =ESR_EC_SMC
 	cmp	x11, x10
-	b.ne	.default
+	b.ne	.default		// Nope
 
+// 2. #imm16 == ESR_ISS_RMM?
 	and	x10, x9, #ESR_ISS
-	cmp	x10, #ESR_ISS_RMV
-	b.ne	.is_not_rmv_call
-//is_rmv_call:
+	cmp	x10, #ESR_ISS_RMM
+	b.ne	.is_not_rmm_call	// SMC, but not to RMM
+//is_rmm_call:
 
 /* Setup per cpu id storage frame
  * This is not a stack as it grows from start to end:
@@ -88,21 +91,21 @@ el3_vector_sync_lel:
 	umaddl	x9, w10, w11, x9	// x9 = x9 + (w10 * w11)
 	mov	sp, x9
 
-	b	.rmv_call_handler
+	b	.rmm_call_handler
 
-.is_not_rmv_call:
-	cmp	x10, #ESR_ISS_RMV_RETURN
-	b.eq	.rmv_return
+.is_not_rmm_call:
+	cmp	x10, #ESR_ISS_RMM_RETURN
+	b.eq	.rmm_return
 
 	b	.default
 
-.rmv_return:
+.rmm_return:
 	mov	x9, x0
 	mov	x10, x1
 	mov	x11, x2
 	mov	x12, x3
 
-	writeln rmv_return
+	writeln rmm_return
 
 	mov	x0, x9
 
@@ -139,7 +142,7 @@ el3_vector_sync_lel:
 	writeln unreachable
 	bomb
 
-.rmv_call_handler:
+.rmm_call_handler:
 // TODO: what context should look like?
 	stp	x0, x1, [sp, #0]
 	stp	x2, x3, [sp, #16]
@@ -157,7 +160,7 @@ el3_vector_sync_lel:
 	stp	x4, x5, [sp, #112]
 	str	x30,	[sp, #128]
 
-	writeln rmv_call
+	writeln rmm_call
 	ldr	x0, [sp, #0]	// X0
 	prhex64 x0
 	writeln crlf
@@ -255,18 +258,18 @@ sel2_entry_point:
 
 	add	x0, x0, #1
 // End of RMM
-	smc	#ESR_ISS_RMV_RETURN
+	smc	#ESR_ISS_RMM_RETURN
 
 // Must not reach here
 	writeln unreachable
 	bomb
 
 .section ".rodata"
-rmv_call:
-	.asciz "RMV call X0=0x"
+rmm_call:
+	.asciz "RMM call X0=0x"
 hi_from_sel2:
 	.asciz "Hi from S-EL2\r\n"
-rmv_return:
+rmm_return:
 	.asciz "Bye from S-EL2\r\n"
 
 	.global unreachable
