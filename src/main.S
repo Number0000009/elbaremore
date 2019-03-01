@@ -78,7 +78,7 @@ primary_cpu_continue:
 	mrs	x0, CurrentEL
 	ubfm	w0, w0, #2, #31
 	add	w0, w0, '0'
-	bl	putch
+	putch w0
 	writecrlf
 
 // Relocate kernel
