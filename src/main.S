@@ -36,9 +36,16 @@ main:
 
 	orr	x0, x0, SCR_RW
 	orr	x0, x0, SCR_NS
-// TODO: check if PAC implemented
+
+// check if PAC is implemented
+	mrs	x1, ID_AA64ISAR1_EL1
+	ldr	x2, =API_APA_GPI_GPA
+	and	x1, x1, x2
+	cbz	x1, .no_pac
+
 	orr	x0, x0, SCR_APK
 	orr	x0, x0, SCR_API
+.no_pac:
 	msr	SCR_EL3, x0
 
 	ldr	x0, =SPSR_KERNEL

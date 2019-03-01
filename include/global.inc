@@ -54,3 +54,7 @@
 #define SCR_API		(1 << 17)	/* AP insn enable */
 
 #define SCTLR_M		(1 << 0)	/* MMU disabled */
+
+#define API_APA_GPI_GPA	(0xff << 24) | (0xff << 4)	/* ID_AA64ISAR1_EL1
+							 * GPI, GPA, API, APA
+							 * bitfields */
