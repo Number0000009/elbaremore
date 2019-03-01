@@ -13,7 +13,7 @@ putch:
 	mov	x1, #PL011_UART0_BASE
 1:
 	ldrb	w2, [x1, #PL011_UARTFR]
-	ands	w2, w2, #PL011_UART_TXFE
-	b.eq	1b
+	and	w2, w2, #PL011_UART_TXFE
+	cbz	w2, 1b
 	strb	w0, [x1, #PL011_UARTDR]
 	ret
