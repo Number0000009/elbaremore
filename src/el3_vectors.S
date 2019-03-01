@@ -98,13 +98,20 @@ el3_vector_sync_lel:
 
 .rmv_return:
 	mov	x9, x0
+	mov	x10, x1
+	mov	x11, x2
+	mov	x12, x3
+
 	writeln rmv_return
+
 	mov	x0, x9
+
 	prhex64 x0
 	writeln crlf
 
 // return_from_sel2
-// restore context
+// restore context minus x0-x3, x0-x3 come from SMC call args
+// TODO: what context should look like?
 	ldp	x0, x1, [sp, #80]
 	ldp	x2, x3, [sp, #96]
 	ldp	x4, x5, [sp, #112]
@@ -116,16 +123,14 @@ el3_vector_sync_lel:
 	msr	SPSR_EL2, x4
 	msr	ELR_EL2, x5
 
-	ldp	x0, x1, [sp, #0]
-	ldp	x2, x3, [sp, #16]
+	mov	x0, x9
+	mov	x1, x10
+	mov	x2, x11
+	mov	x3, x12
+
 	ldp	x4, x5, [sp, #32]
 	ldp	x6, x7, [sp, #48]
-
-// restore mutated X0
-	mov	x0, x9
-
 	ldp	x8, x9, [sp, #64]
-// TODO: is this enough?
 
 	msr	DAIFclr, #0xf
 	eret
@@ -135,14 +140,12 @@ el3_vector_sync_lel:
 	bomb
 
 .rmv_call_handler:
-// TODO: not the whole context, just per SMCCC + sysregs
+// TODO: what context should look like?
 	stp	x0, x1, [sp, #0]
 	stp	x2, x3, [sp, #16]
 	stp	x4, x5, [sp, #32]
 	stp	x6, x7, [sp, #48]
 	stp	x8, x9, [sp, #64]
-// TODO: is this enough?
-
 	mrs	x0, SCR_EL3
 	mrs	x1, SCTLR_EL2
 	mrs	x2, SPSR_EL3
@@ -155,7 +158,7 @@ el3_vector_sync_lel:
 	str	x30,	[sp, #128]
 
 	writeln rmv_call
-	ldr	x0, [sp, #0]
+	ldr	x0, [sp, #0]	// X0
 	prhex64 x0
 	writeln crlf
 
@@ -223,7 +226,9 @@ goto_sel2:
 	ldr	x0, =sel2_entry_point
 	msr	ELR_EL3, x0
 
-	ldr	x0, [sp, #0]	// X0
+// Restore x0-x3 of RMC call
+	ldp	x0, x1, [sp, #0]
+	ldp	x2, x3, [sp, #16]
 
 	eret
 
@@ -233,11 +238,23 @@ goto_sel2:
 
 // ------------------------------
 // This is executed at Secure EL2
+// TODO: this is S-EL2 RMM, impement it
+sel2_rmm_starts_here:
 sel2_entry_point:
 	mov	x9, x0
+	mov	x10, x1
+	mov	x11, x2
+	mov	x12, x3
+
 	writeln hi_from_sel2
+
 	mov	x0, x9
+	mov	x1, x10
+	mov	x2, x11
+	mov	x3, x12
+
 	add	x0, x0, #1
+// End of RMM
 	smc	#ESR_ISS_RMV_RETURN
 
 // Must not reach here
