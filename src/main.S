@@ -175,21 +175,3 @@ reloc2:
 // Must not reach here
 	writeln unreachable
 	bomb
-
-.section ".rodata"
-current_el:
-	.asciz "Current EL = EL"
-relocate_kernel_from:
-	.asciz "Relocating kernel from 0x"
-relocate_kernel_to:
-	.asciz "\tto 0x"
-relocate_dtb_from:
-	.asciz "Relocating DTB from 0x"
-relocate_dtb_to:
-	.asciz "\tto 0x"
-enter_kernel:
-	.asciz "Booting Linux\r\n"
-
-	.global crlf
-crlf:
-	.asciz "\r\n"

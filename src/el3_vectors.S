@@ -129,13 +129,4 @@ el3_vector_serror_lel_32:
 	bomb
 
 .section ".rodata"
-rmm_call:
-	.asciz "RMM call X0=0x"
-hi_from_sel2:
-	.asciz "Hi from S-EL2\r\n"
-rmm_return:
-	.asciz "Bye from S-EL2\r\n"
-
-	.global unreachable
-unreachable:
-	.asciz "What r u doing here, bro?\r\n"
+#include <strings.inc>
