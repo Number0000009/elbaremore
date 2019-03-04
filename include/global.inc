@@ -11,6 +11,9 @@
 #error "Stack must be larger than context frame"
 #endif
 
+#define EL2_STACK_TOP (0x06000000 + 0x1ffffff/2)
+#define EL2_STACK_SIZE 0x4000
+
 // Taken from bootwrapper arch/aarch64/include/asm/cpu.h
 #define SPSR_A		(1 << 8)	/* System Error masked */
 #define SPSR_D		(1 << 9)	/* Debug masked */

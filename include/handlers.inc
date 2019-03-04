@@ -100,8 +100,8 @@ goto_sel2:
 	ldr	x0, =SPSR_SEL2
 	msr	SPSR_EL3, x0
 
-// TODO: EL3 and S-EL2 stacks should be different
-	mov	x0, sp
+// TODO: is that a bad thing we start aclean each time we enter sel2?
+	allocate_stack EL2_STACK_TOP+1 EL2_STACK_SIZE, x0
 	msr	sp_el2, x0
 
 	ldr	x0, =sel2_entry_point

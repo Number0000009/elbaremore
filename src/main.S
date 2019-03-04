@@ -17,7 +17,8 @@ main:
 	msr	VBAR_EL3, x0
 	isb
 
-	setup_stacks
+	allocate_stack EL3_STACK_TOP+1 EL3_STACK_SIZE, x0
+	mov	sp, x0
 
 	ldr	x0, =MAILBOX
 	str	xzr, [x0]
