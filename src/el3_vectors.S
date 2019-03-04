@@ -2,7 +2,7 @@
 #include <uart_macros.inc>
 #include <cpuid_macros.inc>
 #include <bomb_macros.inc>
-#include <vectors.inc>
+#include <vectors_strings.inc>
 #include <handlers.inc>
 
 // TODO: this should be living in Trusted Boot ROM
