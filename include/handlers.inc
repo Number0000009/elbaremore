@@ -17,9 +17,9 @@
 	ldp	x8, x9, [sp, #112]
 	ldp	x10, x30,[sp, #128]
 	msr	SCR_EL3, x4
-	msr	SCTLR_EL2, x5
-	msr	SPSR_EL3, x6
-	msr	ELR_EL3, x7
+	msr	SPSR_EL3, x5
+	msr	ELR_EL3, x6
+	msr	SCTLR_EL2, x7
 	msr	SPSR_EL2, x8
 	msr	ELR_EL2, x9
 	msr	SP_EL2, x10
@@ -48,10 +48,11 @@
 	stp	x4, x5, [sp, #32]
 	stp	x6, x7, [sp, #48]
 	stp	x8, x9, [sp, #64]
+// Why store _EL3 you might ask? That's because we co-exist with KVM Hypervisor
 	mrs	x0, SCR_EL3
-	mrs	x1, SCTLR_EL2
-	mrs	x2, SPSR_EL3
-	mrs	x3, ELR_EL3
+	mrs	x1, SPSR_EL3
+	mrs	x2, ELR_EL3
+	mrs	x3, SCTLR_EL2
 	mrs	x4, SPSR_EL2
 	mrs	x5, ELR_EL2
 	mrs	x6, SP_EL2
