@@ -18,7 +18,6 @@ Then:
 ## TODO
 A *minimal* boot environment.
 
-- Add SCR_EL3.NS validation
 - SMC ping-pong
 - Add TZC-400 support for actual memory/io filtering? Currently secure memory modelling is disabled, although we do payload (Linux kernel with DTB) relocation from Trusted Boot ROM to DRAM bank 1, which is kinda stupid without having the actual secure memory enabled?
 

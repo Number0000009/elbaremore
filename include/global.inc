@@ -59,13 +59,16 @@
 						 * and EL3 ICC_* registers is
 						 * enabled for EL3. */
 
-#define SCR_RW		(1 << 10)	/* The next lower level is AArch64. */
-#define SCR_NS		(1 << 0)	/* Exception levels lower than
-					 * EL3 are in Non-secure state. */
-#define SCR_EEL2	(1 << 18)	/* All behaviors associated with
-					 * Secure EL2 are enabled */
-#define SCR_APK		(1 << 16)	/* AP key enable */
-#define SCR_API		(1 << 17)	/* AP insn enable */
+#define SCR_RW		(1 << 10)		/* The next lower level
+						 * is AArch64. */
+#define SCR_NS_BIT	0
+#define SCR_NS		(1 << SCR_NS_BIT)	/* Exception levels lower than
+						 * EL3 are in Non-secure
+						 * state */
+#define SCR_EEL2	(1 << 18)		/* All behaviors associated with
+						 * Secure EL2 are enabled */
+#define SCR_APK		(1 << 16)		/* AP key enable */
+#define SCR_API		(1 << 17)		/* AP insn enable */
 
 #define SCTLR_M		(1 << 0)	/* MMU disabled */
 

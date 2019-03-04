@@ -71,11 +71,26 @@ el3_vector_sync_lel:
 	and	x10, x9, #ESR_ISS
 	cmp	x10, #ESR_ISS_RMM
 	b.ne	.is_not_rmm_call	// SMC, but not to RMM
-//is_rmm_call:
 
+// 3. which secure state does it come from?
+	mrs	x9, SCR_EL3
+// It's an rmm call, but from secure world - ignore it
+// The only SMC call from secure world we expect is return from rmm call
+	tbz	x9, SCR_NS_BIT, .default
+
+// from NS
+// is_rmm_call:
 	b	.rmm_call_handler
 
+// TODO: how to validate return call is a part of rmm call?
+// S-EL2 can call just SMC #ESR_ISS_RMM_RETURN and pass the validation,
+// some more logic needed here
 .is_not_rmm_call:
+// Is this rmm return call? It must be from secure EL2, if not - ignore it
+	mrs	x9, SCR_EL3
+	tbnz	x9, SCR_NS_BIT, .default
+
+// .is_rmm_return:
 	cmp	x10, #ESR_ISS_RMM_RETURN
 	b.eq	.rmm_return
 
