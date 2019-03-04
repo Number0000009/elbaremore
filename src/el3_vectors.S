@@ -57,7 +57,7 @@ el3_vector_serror_spx:
 el3_vector_sync_lel:
 	msr	DAIFset, #0xf
 
-// Per ARM DEN 0070A X9...X15 are temporary registers
+// Per ARM DEN 0070A X9-X15 are temporary registers
 // Validate SMC call issuer
 // 1. is this an SMC call?
 	mrs	x9, ESR_EL3
