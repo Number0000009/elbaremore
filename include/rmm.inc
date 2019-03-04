@@ -1,17 +1,20 @@
 // This is executed at Secure EL2
 // TODO: this is S-EL2 RMM, impement it
 sel2_entry_point:
-	mov	x9, x0
-	mov	x10, x1
-	mov	x11, x2
-	mov	x12, x3
+// TODO: what context should look like?
+	stp	x0, x1, [sp, #-16]!
+	stp	x2, x3, [sp, #-16]!
+	stp	x4, x5, [sp, #-16]!
+	stp	x6, x7, [sp, #-16]!
+	str	x8,	[sp, #-8]!
 
 	writeln hi_from_sel2
 
-	mov	x0, x9
-	mov	x1, x10
-	mov	x2, x11
-	mov	x3, x12
+	ldr	x8,	[sp], #8
+	ldp	x6, x7, [sp], #16
+	ldp	x4, x5, [sp], #16
+	ldp	x2, x3, [sp], #16
+	ldp	x0, x1, [sp], #16
 
 	add	x0, x0, #1
 // End of RMM
