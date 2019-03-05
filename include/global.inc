@@ -29,10 +29,6 @@
 #define ESR_EC		(0b111111 << 26)
 #define ESR_ISS		(0b111111111111111111111111 << 0)
 #define ESR_EC_SMC	(0b010111 << 26)
-// RMM call
-#define ESR_ISS_RMM		666
-// RMM request completed in S-EL2
-#define ESR_ISS_RMM_RETURN	777
 
 // Taken from boot-wrapper arch/aarch64/include/asm/gic-v3.h
 #define ICC_SRE_EL3	S3_6_C12_C12_5
@@ -69,8 +65,6 @@
 						 * Secure EL2 are enabled */
 #define SCR_APK		(1 << 16)		/* AP key enable */
 #define SCR_API		(1 << 17)		/* AP insn enable */
-
-#define SCTLR_M		(1 << 0)	/* MMU disabled */
 
 #define API_APA_GPI_GPA	(0xff << 24) | (0xff << 4)	/* ID_AA64ISAR1_EL1
 							 * GPI, GPA, API, APA

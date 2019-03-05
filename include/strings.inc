@@ -1,15 +1,19 @@
 rmm_call:
 	.asciz "RMM call X0=0x"
-hi_from_sel2:
-	.asciz "Hi from S-EL2\r\n"
 rmm_return:
-	.asciz "Bye from S-EL2\r\n"
+	.asciz "Return from RMM call\r\n"
+call_read:
+	.asciz "RMM.Read\r\n"
+call_write:
+	.asciz "RMM.Write\r\n"
+call_unknown:
+	.asciz "Unknown RMM call\r\n"
 
 // global strings
 
 	.global unreachable
 unreachable:
-	.asciz "What r u doing here, bro?\r\n"
+	.asciz "*** Reached the unreacheable ***\r\n"
 
 	.global crlf
 crlf:

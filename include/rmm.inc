@@ -1,3 +1,7 @@
+#include <rmm_calls.inc>
+
+#define storage_size	64
+#define S_X0		0x38
 // This is executed at Secure EL2
 // TODO: this is S-EL2 RMM, impement it
 sel2_entry_point:
@@ -8,18 +12,50 @@ sel2_entry_point:
 	stp	x6, x7, [sp, #-16]!
 	str	x8,	[sp, #-8]!
 
-	writeln hi_from_sel2
+	cmp	x10, #ESR_ISS_RMM_READ
+	b.eq	.rmm_call_read
 
+	cmp	x10, #ESR_ISS_RMM_WRITE
+	b.eq	.rmm_call_write
+
+	b	.rmm_call_unknown
+
+// Must not reach here
+	writeln unreachable
+	bomb
+
+.rmm_call_return:
+// End of RMM
 	ldr	x8,	[sp], #8
 	ldp	x6, x7, [sp], #16
 	ldp	x4, x5, [sp], #16
 	ldp	x2, x3, [sp], #16
 	ldp	x0, x1, [sp], #16
 
-	add	x0, x0, #1
-// End of RMM
 	smc	#ESR_ISS_RMM_RETURN
 
-// Must not reach here
-	writeln unreachable
-	bomb
+.rmm_call_unknown:
+	writeln call_unknown
+	b	.rmm_call_return
+
+.rmm_call_read:
+	writeln call_read
+
+	ldr	x10, =storage
+	ldr	x0, [x10]
+
+	b	.rmm_call_return
+
+.rmm_call_write:
+	writeln call_write
+
+	ldr	x10, =storage
+	mov	x11, #storage_size
+	cpuid	x12
+	umaddl	x10, w12, w11, x10
+	str	x0, [x10]
+
+	mov	x0, xzr
+	str	x0, [sp, #S_X0]
+
+	b	.rmm_call_return

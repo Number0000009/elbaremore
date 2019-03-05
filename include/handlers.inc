@@ -92,7 +92,9 @@ goto_sel2:
 	msr	SPSR_EL3, x0
 
 // TODO: is that a bad thing we start aclean each time we enter sel2?
+	stp	x10, x11, [sp, #-16]!
 	allocate_stack EL2_STACK_TOP+1 EL2_STACK_SIZE, x0
+	ldp	x10, x11, [sp], #16
 	msr	sp_el2, x0
 
 	ldr	x0, =sel2_entry_point

@@ -69,9 +69,17 @@ el3_vector_sync_lel:
 
 // 2. #imm16 == ESR_ISS_RMM?
 	and	x10, x9, #ESR_ISS
-	cmp	x10, #ESR_ISS_RMM
-	b.ne	.is_not_rmm_call	// SMC, but not to RMM
 
+	cmp	x10, #ESR_ISS_RMM_READ
+	b.eq	.rmm_read
+
+	cmp	x10, #ESR_ISS_RMM_WRITE
+	b.eq	.rmm_write
+
+	b	.not_rmm_call	// SMC, but not to RMM
+
+.rmm_read:
+.rmm_write:
 // 3. which secure state does it come from?
 	mrs	x9, SCR_EL3
 // It's an rmm call, but from secure world - ignore it
@@ -85,7 +93,7 @@ el3_vector_sync_lel:
 // TODO: how to validate return call is a part of rmm call?
 // S-EL2 can call just SMC #ESR_ISS_RMM_RETURN and pass the validation,
 // some more logic needed here
-.is_not_rmm_call:
+.not_rmm_call:
 // Is this rmm return call? It must be from secure EL2, if not - ignore it
 	mrs	x9, SCR_EL3
 	tbnz	x9, SCR_NS_BIT, .default
@@ -138,3 +146,7 @@ el3_vector_serror_lel_32:
 
 .section ".rodata"
 #include <strings.inc>
+
+.section ".bss"
+storage:
+	.space (storage_size * 4)
