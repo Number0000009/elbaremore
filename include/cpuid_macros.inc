@@ -8,7 +8,7 @@
 	.endm
 
 /* Allocate per cpu id stacks
- * TOP				BOTTOM
+ * BOTTOM			  TOP
  * o-------o-------o-------o-------o
  * ^\_____/^\_____/^\_____/^\_____/^
  *  id = 3     2       1       0
