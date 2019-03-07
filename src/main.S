@@ -59,18 +59,14 @@ main:
 	tst	x0, #0x0f	// primary core = 0b0000
 	b.eq	primary_cpu_continue
 
-	ldr	x0, =.el2_continue
-	msr	ELR_EL3, x0
-	eret
-
-.el2_continue:
 	ldr	x1, =MAILBOX
 	sevl
 .wait:
 	wfe
 	ldr	x0, [x1]
 	cbz	x0, .wait
-	br	x0
+	msr	ELR_EL3, x0
+	eret
 
 primary_cpu_continue:
 	writeln current_el
