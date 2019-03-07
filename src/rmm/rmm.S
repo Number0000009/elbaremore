@@ -1,9 +1,16 @@
 #include <rmm_calls.inc>
+#include <uart_macros.inc>
+#include <bomb_macros.inc>
+#include <cpuid_macros.inc>
+#include <strings.inc>
 
-#define storage_size	64
 #define S_X0		0x38
+
+	.section ".rodata"
+
 // This is executed at Secure EL2
 // TODO: this is S-EL2 RMM, impement it
+	.global sel2_entry_point
 sel2_entry_point:
 // TODO: what context should look like?
 	stp	x0, x1, [sp, #-16]!
@@ -21,7 +28,7 @@ sel2_entry_point:
 	b	.rmm_call_unknown
 
 // Must not reach here
-	writeln unreachable
+	writeln unreachable_msg
 	bomb
 
 .rmm_call_return:
@@ -35,11 +42,11 @@ sel2_entry_point:
 	smc	#ESR_ISS_RMM_RETURN
 
 .rmm_call_unknown:
-	writeln call_unknown
+	writeln call_unknown_msg
 	b	.rmm_call_return
 
 .rmm_call_read:
-	writeln call_read
+	writeln call_read_msg
 
 	ldr	x10, =storage
 	ldr	x0, [x10]
@@ -47,7 +54,7 @@ sel2_entry_point:
 	b	.rmm_call_return
 
 .rmm_call_write:
-	writeln call_write
+	writeln call_write_msg
 
 	ldr	x10, =storage
 	mov	x11, #storage_size
@@ -59,3 +66,7 @@ sel2_entry_point:
 	str	x0, [sp, #S_X0]
 
 	b	.rmm_call_return
+
+.section ".bss"
+storage:
+	.space (storage_size * 4)

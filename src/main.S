@@ -1,3 +1,4 @@
+#include <global.inc>
 #include <uart_macros.inc>
 #include <bomb_macros.inc>
 #include <cpuid_macros.inc>
@@ -69,7 +70,7 @@ main:
 	eret
 
 primary_cpu_continue:
-	writeln current_el
+	writeln current_el_msg
 
 // print current EL
 	mrs	x0, CurrentEL
@@ -90,10 +91,10 @@ primary_cpu_continue:
 	ldr	x0, =(kernel_image_start - 16)
 	ldr	x1, =(KERNEL_ADDR - 16)
 
-	writeln relocate_kernel_from
+	writeln relocate_kernel_from_msg
 	prhex64 x0
 	writecrlf
-	writeln relocate_kernel_to
+	writeln relocate_kernel_to_msg
 	phex64 KERNEL_ADDR
 	writecrlf
 reloc1:
@@ -112,10 +113,10 @@ reloc1:
 	ldr	x0, =(dtb_image_start - 16)
 	ldr	x1, =(DTB_ADDR - 16)
 
-	writeln relocate_dtb_from
+	writeln relocate_dtb_from_msg
 	prhex64 x0
 	writecrlf
-	writeln relocate_dtb_to
+	writeln relocate_dtb_to_msg
 	phex64 DTB_ADDR
 	writecrlf
 reloc2:
@@ -164,7 +165,7 @@ reloc2:
  * - The DT or ACPI tables must describe a GICv3 interrupt controller.
 */
 
-	writeln enter_kernel
+	writeln enter_kernel_msg
 	ldr	x0, =DTB_ADDR
 	mov	x1, xzr
 	mov	x2, xzr
@@ -173,5 +174,8 @@ reloc2:
 	eret
 
 // Must not reach here
-	writeln unreachable
+	writeln unreachable_msg
 	bomb
+
+.section ".rodata"
+#include <strings.inc>

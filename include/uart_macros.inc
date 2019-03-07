@@ -4,7 +4,6 @@
  */
 
 #include <platform.inc>
-#include <global.inc>
 
 // Transmit a character at default baud rate and flow control
 // Input: char - char
@@ -78,5 +77,5 @@
 // Print CR-LF
 // Input:
 	.macro writecrlf
-	writeln crlf
+	writeln crlf_msg
 	.endm

@@ -1,3 +1,5 @@
+#define storage_size		64
+
 // RMM calls table:
 
 // Retrieve X0 from S-EL2

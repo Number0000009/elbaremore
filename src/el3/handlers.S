@@ -1,10 +1,15 @@
-#include <rmm.inc>
 #include <global.inc>
+#include <uart_macros.inc>
+#include <bomb_macros.inc>
+#include <cpuid_macros.inc>
+#include <strings.inc>
+#include <vectors_strings.inc>
 
-.rmm_return:
-	writeln rmm_return
+	.global rmm_return
+rmm_return:
+	writeln rmm_return_msg
 	prhex64 x0
-	writeln crlf
+	writeln crlf_msg
 
 // return_from_sel2
 // restore context minus x0-x3, x0-x3 come from SMC call args
@@ -35,10 +40,11 @@
 	eret
 
 // Must not reach here
-	writeln unreachable
+	writeln unreachable_msg
 	bomb
 
-.rmm_call_handler:
+	.global rmm_call_handler
+rmm_call_handler:
 // Context storage on stack, goes from bottom to top
 	sub	sp, sp, #EL3_STORAGE_FRAME_SIZE
 
@@ -64,21 +70,13 @@
 // Working stack, goes from top to bottom
 	add	sp, sp, #EL3_STORAGE_FRAME_SIZE
 
-	writeln rmm_call
+	writeln rmm_call_msg
 
 	sub	x1, sp, #EL3_STORAGE_FRAME_SIZE
 	ldr	x0, [x1, #0]	// X0
 	prhex64 x0
-	writeln crlf
+	writeln crlf_msg
 
-// No exit from there
-	b	goto_sel2
-
-// Must not reach here
-	writeln unreachable
-	bomb
-
-goto_sel2:
 	mov	x0, xzr
 	bic	x0, x0, SCR_NS		// Secure, probably redundant
 	orr	x0, x0, SCR_EEL2	// SEL2
@@ -108,5 +106,5 @@ goto_sel2:
 	eret
 
 // Must not reach here
-	writeln unreachable
+	writeln unreachable_msg
 	bomb

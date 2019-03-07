@@ -3,11 +3,12 @@
 #include <cpuid_macros.inc>
 #include <bomb_macros.inc>
 #include <vectors_strings.inc>
-#include <handlers.inc>
+#include <strings.inc>
+#include <rmm_calls.inc>
 
-// TODO: this should be living in Trusted Boot ROM
+	.section ".rodata"
+
 	.global el3_vectors
-
 // 0 - 0x200
 	.balign 0x800
 el3_vectors:
@@ -88,7 +89,7 @@ el3_vector_sync_lel:
 
 // from NS
 // is_rmm_call:
-	b	.rmm_call_handler
+	b	rmm_call_handler
 
 // TODO: how to validate return call is a part of rmm call?
 // S-EL2 can call just SMC #ESR_ISS_RMM_RETURN and pass the validation,
@@ -100,7 +101,7 @@ el3_vector_sync_lel:
 
 // .is_rmm_return:
 	cmp	x10, #ESR_ISS_RMM_RETURN
-	b.eq	.rmm_return
+	b.eq	rmm_return
 
 	b	.default
 
@@ -143,10 +144,3 @@ el3_vector_fiq_lel_a32:
 el3_vector_serror_lel_32:
 	writeln abt_serror_lel_a32
 	bomb
-
-.section ".rodata"
-#include <strings.inc>
-
-.section ".bss"
-storage:
-	.space (storage_size * 4)
