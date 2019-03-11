@@ -2,16 +2,11 @@
 #include <uart_macros.inc>
 #include <bomb_macros.inc>
 #include <cpuid_macros.inc>
-#include <strings.inc>
 
 #define S_X0		0x38
 
-	.section ".rodata"
-
 // This is executed at Secure EL2
 // TODO: this is S-EL2 RMM, impement it
-	.global sel2_entry_point
-sel2_entry_point:
 // TODO: what context should look like?
 	stp	x0, x1, [sp, #-16]!
 	stp	x2, x3, [sp, #-16]!
@@ -66,6 +61,8 @@ sel2_entry_point:
 	str	x0, [sp, #S_X0]
 
 	b	.rmm_call_return
+
+#include <strings.inc>
 
 .section ".bss"
 storage:

@@ -12,6 +12,9 @@ Device tree must contain the following node:
 
 Then:
 
+	cd sel2
+	make
+	cd ..
 	make
 	./run.sh
 

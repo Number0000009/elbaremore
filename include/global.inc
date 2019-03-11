@@ -1,3 +1,5 @@
+#define sel2_entry_point rmm_image_start
+
 #define lr x30
 
 // TODO: unhardcode this

@@ -2,11 +2,12 @@ CROSS_COMPILE ?= aarch64-linux-gnu-
 
 CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)ld
+OC := $(CROSS_COMPILE)objcopy
 
-SRC := src/main.S src/el3/vectors.S src/el3/handlers.S
-INCLUDE := -I include
-OBJECTS := main.o vectors.o handlers.o
-OUTPUT := main
+SRC := src/rmm/rmm.S
+INCLUDE := -I ../include
+OBJECTS := rmm.o
+OUTPUT := rmm
 
 CFLAGS := \
 	-Wall \
@@ -20,6 +21,7 @@ LDFLAGS := -T linker.lds
 all:
 	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) -c
 	$(LD) $(OBJECTS) -o $(OUTPUT) $(LDFLAGS)
+	$(OC) -O binary $(OUTPUT)
 
 clean:
 	rm $(OUTPUT) $(OBJECTS)

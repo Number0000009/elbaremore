@@ -23,9 +23,6 @@ MEMORY
 }
 
 TARGET(binary)
-INPUT(./Image)
-INPUT(./fdt.dtb)
-INPUT(./sel2/rmm)
 
 OUTPUT_FORMAT("elf64-littleaarch64")
 OUTPUT_ARCH(aarch64)
@@ -33,34 +30,13 @@ SECTIONS
 {
        .text : {
                 . = ALIGN(8);
-                main.o (.text)
+                rmm.o (.text)
                 *(.text*)
         } >.TBROM
 
         .rodata : {
                 . = ALIGN(8);
                 *(.rodata)
-        } >.TBROM
-
-        .kernel : {
-                . = ALIGN(8);
-                kernel_image_start = .;
-                ./Image
-                kernel_image_end = .;
-        } >.TBROM
-
-        .dtb : {
-                . = ALIGN(8);
-                dtb_image_start = .;
-                ./fdt.dtb
-                dtb_image_end = .;
-        } >.TBROM
-
-        .rmm : {
-                . = ALIGN(8);
-                rmm_image_start = .;
-                ./sel2/rmm
-                rmm_image_end = .;
         } >.TBROM
 
         .data : {
