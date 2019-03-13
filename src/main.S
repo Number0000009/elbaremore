@@ -100,8 +100,8 @@ primary_cpu_continue:
 reloc1:
 	ldp	x3, x4, [x0, #16]!
 	stp	x3, x4, [x1, #16]!
-	subs	x2, x2, #1
-	b.ne	reloc1
+	sub	x2, x2, #1
+	cbnz	x2, reloc1
 
 // Relocate DTB
 // TODO: relocate. fix tail
@@ -122,8 +122,8 @@ reloc1:
 reloc2:
 	ldp	x3, x4, [x0, #16]!
 	stp	x3, x4, [x1, #16]!
-	subs	x2, x2, #1
-	b.ne	reloc2
+	sub	x2, x2, #1
+	cbnz	x2, reloc2
 
 	mov	x1, #GIC_RDIST_BASE
 .gicv3_wakeup:
