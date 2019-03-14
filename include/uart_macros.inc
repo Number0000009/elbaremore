@@ -10,6 +10,9 @@
 	.macro putch, char
 
 	stp	x1, x2, [sp, #-16]!
+	str	x0,	[sp, #-8]!
+
+	mov	w0, \char
 
 	mov	x1, #PL011_UART0_BASE
 100:
@@ -17,8 +20,9 @@
 	and	w2, w2, #PL011_UART_TXFE
 	cbz	w2, 100b
 
-	strb	\char, [x1, #PL011_UARTDR]
+	strb	w0, [x1, #PL011_UARTDR]
 
+	ldr	x0,	[sp], #8
 	ldp	x1, x2, [sp], #16
 	.endm
 
@@ -37,27 +41,74 @@
 	ldp	x0, x1, [sp], #16
 	.endm
 
-// Print 64-bit hex integer in long form i.e. 0042 - > 0042
-// Input: number - 64-bit integer register to output
-	.macro prhex64, number
+// Print hex number of len digits
+// Input: number - integer hex number, len - number of digits
+	.macro prhex, number, len
+
+	.if \number == \len
+	.error	"This combo isn't supported"
+	.endif
 
 	stp	x0, x1, [sp, #-16]!
 	str	x2,	[sp, #-8]!
 
-	mov	x1, \number
-	mov	x2, #64/4
+	eor	x2, \len, \number
+	.if	\len != x2
+	eor	x0, x2, \len
+	eor	x1, x2, x0
+	.else
+	eor	x1, x2, \number
+	eor	x0, x2, x1
+	.endif
 97:
-	orr	x1, xzr, x1, ror #60
-	and	x0, x1, #0xf
-	cmp	x0, #0xa
+	orr	x0, xzr, x0, ror #60
+	and	x2, x0, #0xf
+	cmp	x2, #0xa
 
-	add	x0, x0, #'0'
+	add	x2, x2, #'0'
 	blo	96f
-	add	x0, x0, #'a' - 10 - '0'
+	add	x2, x2, #'a' - 10 - '0'
 96:
-	putch w0
-	sub	x2, x2, #1
-	cbnz	x2, 97b
+	putch w2
+	sub	x1, x1, #1
+	cbnz	x1, 97b
+
+	ldr	x2,	[sp], #8
+	ldp	x0, x1, [sp], #16
+
+	.endm
+
+// Print 64-bit hex integer in long form i.e. 0042 - > 0042
+// Input: number - 64-bit integer register to output
+	.macro prlhex64, number
+
+	stp	x0, x1, [sp, #-16]!
+
+	mov	x1, \number
+	mov	x0, #64/4
+
+	prhex x1, x0
+
+	ldp	x0, x1, [sp], #16
+	.endm
+
+// Print 64-bit hex integer in short form i.e. 0042 - > 42
+// Input: number - 64-bit integer register to output
+	.macro prshex64, number
+
+	stp	x0, x1, [sp, #-16]!
+	str	x2,	[sp, #-8]!
+
+	mov	x2, \number
+	mov	x1, #64/4
+
+	clz	x0, x2
+	lsr	x0, x0, #2
+	sub	x1, x1, x0
+	lsl	x0, x0, #2
+	lsl	x2, x2, x0
+
+	prhex x2, x1
 
 	ldr	x2,	[sp], #8
 	ldp	x0, x1, [sp], #16
@@ -65,11 +116,22 @@
 
 // Print 64-bit hex integer in long form i.e. 0042 - > 0042
 // Input: number - 64-bit integer to output
-	.macro phex64, number
+	.macro plhex64, number
 	str	x0, [sp, #-8]!
 
 	ldr	x0, =\number
-	prhex64 x0
+	prlhex64 x0
+
+	ldr	x0, [sp], #8
+	.endm
+
+// Print 64-bit hex integer in short form i.e. 0042 - > 42
+// Input: number - 64-bit integer to output
+	.macro pshex64, number
+	str	x0, [sp, #-8]!
+
+	ldr	x0, =\number
+	prshex64 x0
 
 	ldr	x0, [sp], #8
 	.endm

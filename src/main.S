@@ -72,11 +72,9 @@ main:
 primary_cpu_continue:
 	writeln current_el_msg
 
-// print current EL
 	mrs	x0, CurrentEL
 	ubfm	w0, w0, #2, #31
-	add	w0, w0, '0'
-	putch w0
+	prshex64 x0
 	writecrlf
 
 // Relocate kernel
@@ -92,10 +90,10 @@ primary_cpu_continue:
 	ldr	x1, =(KERNEL_ADDR - 16)
 
 	writeln relocate_kernel_from_msg
-	prhex64 x0
+	prshex64 x0
 	writecrlf
 	writeln relocate_kernel_to_msg
-	phex64 KERNEL_ADDR
+	pshex64 KERNEL_ADDR
 	writecrlf
 reloc1:
 	ldp	x3, x4, [x0, #16]!
@@ -114,10 +112,10 @@ reloc1:
 	ldr	x1, =(DTB_ADDR - 16)
 
 	writeln relocate_dtb_from_msg
-	prhex64 x0
+	prshex64 x0
 	writecrlf
 	writeln relocate_dtb_to_msg
-	phex64 DTB_ADDR
+	pshex64 DTB_ADDR
 	writecrlf
 reloc2:
 	ldp	x3, x4, [x0, #16]!

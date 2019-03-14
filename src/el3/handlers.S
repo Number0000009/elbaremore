@@ -8,7 +8,7 @@
 	.global rmm_return
 rmm_return:
 	writeln rmm_return_msg
-	prhex64 x0
+	prshex64 x0
 	writeln crlf_msg
 
 // return_from_sel2
@@ -74,7 +74,7 @@ rmm_call_handler:
 
 	sub	x1, sp, #EL3_STORAGE_FRAME_SIZE
 	ldr	x0, [x1, #0]	// X0
-	prhex64 x0
+	prshex64 x0
 	writeln crlf_msg
 
 	mov	x0, xzr
