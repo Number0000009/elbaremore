@@ -127,14 +127,32 @@ primary_cpu_continue:
 // SGI
 	add	x1, x1, #0x10000
 	mvn	w0, wzr
-	str	w0, [x1, #GICR_IGROUP0]
+	str	w0, [x1, #GIC_IGROUP0]
 
 	mov	w0, wzr
-	str	w0, [x1, #GICR_IGRPMOD0]
+	str	w0, [x1, #GIC_IGRPMOD0]
 
 	add	x1, x1, #0x10000
 
 	tbz	x2, #GICR_TYPER_Last_BIT, .gicv3_wakeup
+
+	mov	x1, #GIC_DIST_BASE
+	ldr	w2, [x1, #GICD_TYPER]
+
+	and	x2, x2, #GICD_TYPER_ITLineNumber
+
+	sub	x2, x2, #1
+	mov	x4, x1
+.gicv3_dwakeup:
+	add	x1, x4, x2, lsl #2
+
+	mvn	w0, wzr
+	str	w0, [x1, #GIC_IGROUP0]
+
+	mov	w0, wzr
+	str	w0, [x1, #GIC_IGRPMOD0]
+	sub	x2, x2, #1
+	cbnz	x2, .gicv3_dwakeup
 
 	ldr	x0, =KERNEL_ENTRY_POINT
 	msr	ELR_EL3, x0
