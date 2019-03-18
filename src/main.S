@@ -79,12 +79,11 @@ primary_cpu_continue:
 
 // Relocate kernel
 
-// TODO: relocate. fix tail
 	ldr	x2, =(kernel_image_end)
 	ldr	x0, =(kernel_image_start)
 
+// length
 	sub	x2, x2, x0
-	lsr	x2, x2, #4
 
 	ldr	x0, =(kernel_image_start - 16)
 	ldr	x1, =(KERNEL_ADDR - 16)
@@ -95,18 +94,15 @@ primary_cpu_continue:
 	writeln relocate_kernel_to_msg
 	pshex64 KERNEL_ADDR
 	writecrlf
-reloc1:
-	ldp	x3, x4, [x0, #16]!
-	stp	x3, x4, [x1, #16]!
-	sub	x2, x2, #1
-	cbnz	x2, reloc1
+
+	bl memcpy
 
 // Relocate DTB
-// TODO: relocate. fix tail
 	ldr	x2, =(dtb_image_end)
 	ldr	x0, =(dtb_image_start)
+
+// length
 	sub	x2, x2, x0
-	lsr	x2, x2, #4
 
 	ldr	x0, =(dtb_image_start - 16)
 	ldr	x1, =(DTB_ADDR - 16)
@@ -117,11 +113,8 @@ reloc1:
 	writeln relocate_dtb_to_msg
 	pshex64 DTB_ADDR
 	writecrlf
-reloc2:
-	ldp	x3, x4, [x0, #16]!
-	stp	x3, x4, [x1, #16]!
-	sub	x2, x2, #1
-	cbnz	x2, reloc2
+
+	bl memcpy
 
 	mov	x1, #GIC_RDIST_BASE
 .gicv3_wakeup:
@@ -174,6 +167,46 @@ reloc2:
 // Must not reach here
 	writeln unreachable_msg
 	bomb
+
+
+
+// memcpy
+// from x0 to x1 of x2 bytes
+memcpy:
+	stp	x0, x1, [sp, #-16]!
+	stp	x2, x3, [sp, #-16]!
+	stp	x4, x5, [sp, #-16]!
+
+// length
+	mov	x5, x2
+// in 2 x words
+	lsr	x2, x2, #4
+
+// tail in bytes
+	sub	x5, x5, x2, lsl #4
+
+.memcpy1:
+	ldp	x3, x4, [x0, #16]!
+	stp	x3, x4, [x1, #16]!
+	sub	x2, x2, #1
+	cbnz	x2, .memcpy1
+
+	cbz	x5, .memcpy_exit
+	add	x0, x0, #15
+	add	x1, x1, #15
+	mov	x2, x5
+.memcpy2:
+	ldrb	w3, [x0, #1]!
+	strb	w3, [x1, #1]!
+	sub	x2, x2, #1
+	cbnz	x2, .memcpy2
+
+.memcpy_exit:
+	ldp	x4, x5, [sp], #16
+	ldp	x2, x3, [sp], #16
+	ldp	x0, x1, [sp], #16
+
+	ret
 
 .section ".rodata"
 #include <strings.inc>
