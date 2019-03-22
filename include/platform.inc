@@ -1,8 +1,0 @@
-// Per ARM DDI 0183F
-
-#define PL011_UARTDR		0x00
-#define PL011_UARTFR		0x18
-
-#define PL011_UART_TXFE		(1<<7)
-
-#define PL011_UART0_BASE	0x1c090000
